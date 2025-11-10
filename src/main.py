@@ -73,15 +73,15 @@ def solve_heat_equation(N, final_t, dt, t_plot):
     # Adopt the implementation from the demo solver: treat N as the number of INTERNAL nodes
     # and use a (N+2)x(N+2) array including Dirichlet boundaries at 0 and 1.
     # This version has been verified in `src/demo.py` and ensures consistent indexing.
-    h = 1.0 / (N + 1)
+    h = 1.0 / N
 
-    x = np.linspace(0, 1, N + 2)
-    y = np.linspace(0, 1, N + 2)
+    x = np.linspace(0, 1, N + 1)
+    y = np.linspace(0, 1, N + 1)
     xx, yy = np.meshgrid(x, y)
     xx_int, yy_int = np.meshgrid(x[1:-1], y[1:-1])
 
     # Temperature array including boundaries
-    T = np.zeros((N + 2, N + 2))
+    T = np.zeros((N + 1, N + 1))
     # initial condition on internal nodes
     T[1:-1, 1:-1] = np.sin(np.pi * xx_int) * np.sin(np.pi * yy_int)
 
@@ -91,10 +91,10 @@ def solve_heat_equation(N, final_t, dt, t_plot):
     T_at_t_plot = None
     plot_time_step = int(round(t_plot / dt))
 
-    # TDMA diagonals for internal system size N
-    a = np.full(N - 1, -r)
-    b = np.full(N, 1 + 2 * r)
-    c = np.full(N - 1, -r)
+    # TDMA diagonals for internal system size N - 1
+    a = np.full(N - 2, -r)
+    b = np.full(N - 1, 1 + 2 * r)
+    c = np.full(N - 2, -r)
 
     for step in range(n_steps):
         current_t = step * dt
@@ -110,8 +110,8 @@ def solve_heat_equation(N, final_t, dt, t_plot):
         RHS = T_int + r * (Tx + Ty)
 
         # X-sweep: solve along rows (for each y)
-        T_star = np.zeros((N, N))
-        for j in range(N):
+        T_star = np.zeros((N-1, N-1))
+        for j in range(N-1):
             d = RHS[j, :]
             sol = tdma_solver(a, b, c, d)
             if sol is None:
@@ -120,8 +120,8 @@ def solve_heat_equation(N, final_t, dt, t_plot):
             T_star[j, :] = sol
 
         # Y-sweep: solve along columns
-        T_new_int = np.zeros((N, N))
-        for i in range(N):
+        T_new_int = np.zeros((N-1, N-1))
+        for i in range(N-1):
             d = T_star[:, i]
             sol = tdma_solver(a, b, c, d)
             if sol is None:
@@ -129,7 +129,14 @@ def solve_heat_equation(N, final_t, dt, t_plot):
                 return T, None, xx, yy
             T_new_int[:, i] = sol
 
+        # update internal points
         T[1:-1, 1:-1] = T_new_int
+        
+        # update boundary conditions explicitly (Dirichlet T=0 on all boundaries)
+        T[0, :] = 0.0  # bottom boundary
+        T[-1, :] = 0.0  # top boundary
+        T[:, 0] = 0.0  # left boundary
+        T[:, -1] = 0.0  # right boundary
 
     # capture final if needed
     if T_at_t_plot is None and abs(final_t - t_plot) < (dt / 2.0):
@@ -167,20 +174,6 @@ def plot_2d_colormap(xx, yy, Z, title, filename=None):
     plt.ylabel('y')
     plt.title(title)
     plt.axis('scaled')
-    if filename:
-        plt.savefig(filename)
-        print(f"Figure successfully saved as {filename}")
-    else:
-        plt.show()
-
-def plot_line(x, y, title, xlabel, ylabel, filename=None):
-    """draw 2D line plot"""
-    plt.figure(figsize=(8, 6))
-    plt.plot(x, y, 'o-')
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.title(title)
-    plt.grid(True)
     if filename:
         plt.savefig(filename)
         print(f"Figure successfully saved as {filename}")
@@ -355,7 +348,7 @@ if __name__ == "__main__":
     print(f"Measure the computation time (N={N_time}, dt={dt_time}, {n_steps_time} steps) ...")
 
     start_time = time.time()
-    solve_heat_equation(N_time, dt_time, t_final_time, t_plot=t_plot)
+    solve_heat_equation(N_time,t_final_time, dt_time, t_plot=t_plot)
     end_time = time.time()
     
     elapsed_time = end_time - start_time
