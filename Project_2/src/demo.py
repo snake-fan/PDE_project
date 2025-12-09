@@ -7,6 +7,9 @@ from pathlib import Path
 import os
 from numba import jit
 
+# ==========================================
+# Part 1: Numba 加速内核
+# ==========================================
 
 @jit(nopython=True)
 def get_k_numba(x, y):
@@ -49,11 +52,8 @@ def line_sor_kernel(u, coef_h, coef_v, source, max_iter, tol, omega):
     """Line SOR 求解器"""
     N = u.shape[0] - 1
     n_inner = N - 1
-    vec_a = np.zeros(n_inner)
-    vec_b = np.zeros(n_inner)
-    vec_c = np.zeros(n_inner)
-    vec_d = np.zeros(n_inner)
-    vec_x = np.zeros(n_inner)
+    vec_a = np.zeros(n_inner); vec_b = np.zeros(n_inner)
+    vec_c = np.zeros(n_inner); vec_d = np.zeros(n_inner); vec_x = np.zeros(n_inner)
     residuals = []
     
     r0 = compute_residual_norm(u, coef_h, coef_v, source)
@@ -154,6 +154,9 @@ def calculate_residual_field(u, coef_h, coef_v, source):
             r[i, j] = source[i, j] - Au
     return r
 
+# ==========================================
+# Part 2: Python 辅助与主逻辑
+# ==========================================
 
 def get_f_func(x, y):
     return 8 * np.pi**2 * np.sin(2 * np.pi * x) * np.sin(2 * np.pi * y)

@@ -1,10 +1,10 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.4)  7 DEC 2025 09:46
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.4)  7 DEC 2025 16:47
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/home/snake/Projects/PDE/Project_1/project_1/report/report
-(/home/snake/Projects/PDE/Project_1/project_1/report/report.tex
+**/home/snake/Projects/PDE/Project/Project_2/report/report
+(/home/snake/Projects/PDE/Project/Project_2/report/report.tex
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
 (/usr/local/texlive/2025/texmf-dist/tex/latex/base/article.cls
@@ -221,55 +221,25 @@ LaTeX Font Info:    ... okay on input line 14.
 [1
 
 ]
-File: images/exact_temperature_t0.05.png Graphic file (type bmp)
-<images/exact_temperature_t0.05.png>
-File: images/Numerical_temperature_t0.05.png Graphic file (type bmp)
-<images/Numerical_temperature_t0.05.png>
+File: ../plots/Convergence_Comparison.jpg Graphic file (type bmp)
+<../plots/Convergence_Comparison.jpg>
 
 
-[2]
-File: images/error_map_spatial_N10.png Graphic file (type bmp)
-<images/error_map_spatial_N10.png>
-File: images/error_map_spatial_N20.png Graphic file (type bmp)
-<images/error_map_spatial_N20.png>
-File: images/error_map_spatial_N40.png Graphic file (type bmp)
-<images/error_map_spatial_N40.png>
-File: images/error_map_spatial_N80.png Graphic file (type bmp)
-<images/error_map_spatial_N80.png>
-File: images/convergence_spatial.png Graphic file (type bmp)
-<images/convergence_spatial.png>
+[2
 
-
-[3]
-File: images/error_map_temporal_dt0.01.png Graphic file (type bmp)
-<images/error_map_temporal_dt0.01.png>
-File: images/error_map_temporal_dt0.005.png Graphic file (type bmp)
-<images/error_map_temporal_dt0.005.png>
-File: images/error_map_temporal_dt0.0025.png Graphic file (type bmp)
-<images/error_map_temporal_dt0.0025.png>
-File: images/error_map_temporal_dt0.00125.png Graphic file (type bmp)
-<images/error_map_temporal_dt0.00125.png>
-File: images/convergence_temporal.png Graphic file (type bmp)
-<images/convergence_temporal.png>
-
-
-[4]
-
-[5]
-
-[6] (./report.aux)
+] (./report.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 3130 strings out of 473832
- 51155 string characters out of 5729481
- 451447 words of memory out of 5000000
- 26158 multiletter control sequences out of 15000+600000
- 563716 words of font info for 64 fonts, out of 8000000 for 9000
+ 3008 strings out of 473832
+ 46856 string characters out of 5729481
+ 446338 words of memory out of 5000000
+ 26056 multiletter control sequences out of 15000+600000
+ 562765 words of font info for 58 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 57i,9n,65p,623b,225s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 57i,9n,65p,621b,234s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on report.pdf (6 pages).
+Output written on report.pdf (2 pages).

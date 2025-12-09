@@ -1,0 +1,83 @@
+\documentclass{article}
+
+\usepackage{parskip}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath}     % Math formulas
+\usepackage{booktabs}    % High-quality tables
+\usepackage{graphicx}    % Images (for placeholders)
+\usepackage{placeins}
+
+\title{\Huge Numerical Solution of 2D Heat Conduction}
+\author{\normalsize Yifan Zhang  2025251018}
+\date{\normalsize \today}
+
+\begin{document}
+\maketitle
+
+\section*{Problem Statement}
+
+\section*{Solution}
+
+\subsection*{Discretization}
+
+The standard five-point difference scheme is used to
+discretize the equation.
+
+We define that:
+$$-\frac{1}{h^2} \left[ k_{i+\frac{1}{2},j}(u_{i+1,j}-u_{i,j}) - k_{i-\frac{1}{2},j}(u_{i,j}-u_{i-1,j}) \right] \\
+-\frac{1}{h^2} \left[ k_{i,j+\frac{1}{2}}(u_{i,j+1}-u_{i,j}) - k_{i,j-\frac{1}{2}}(u_{i,j}-u_{i,j-1}) \right] = f_{i,j}$$
+and get
+$$a_P u_{i,j} - a_E u_{i+1,j} - a_W u_{i-1,j} - a_N u_{i,j+1} - a_S u_{i,j-1} = h^2 f_{i,j}$$
+which
+\begin{itemize}
+  \item $a_E = k_{i+1/2, j}$
+  \item $a_W = k_{i-1/2, j}$
+  \item $a_N = k_{i, j+1/2}$
+  \item $a_S = k_{i, j-1/2}$
+  \item $a_P = a_E + a_W + a_N + a_S$
+\end{itemize}
+
+\subsection*{Code}
+Shown in the attachment.
+
+\clearpage
+
+\subsection*{Final Result}
+
+\textbf{Convergence speed comparison:}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=.8\textwidth]{../plots/Convergence_Comparison.jpg}
+  \caption{Convergence Comparison}
+  \label{Convergence_Comparison}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \label{tab:convergence_results}
+  \begin{tabular}{lcc}
+    \toprule
+    \textbf{Method} & \textbf{Iterations} & \textbf{Time (s)} \\
+    \midrule
+    Line SOR ($\omega=1.75$) & 133 & 0.5103 \\
+    Conjugate Gradient (CG) & 70 & 0.0025 \\
+    Multigrid (V-Cycle) & \textbf{5} & 0.5535 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Comparison of numerical methods for solving the electrostatic field problem ($N=64$, relative tolerance $\varepsilon = 10^{-6}$).}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{Multigrid (MG)}: Exhibits the fastest convergence.
+    For elliptic equations, MG typically demonstrates a grid-independent convergence rate (requiring $O(1)$ iterations).
+    It generally achieves a relative error of $10^{-6}$ within 5 iterations.
+  \item \textbf{Conjugate Gradient (CG):} Exhibits moderate convergence speed.
+    For a grid with $N=64$, the condition number is $\kappa(A) \approx O(N^2)$,
+    and the number of iterations for CG is roughly proportional to $N$ (specifically $\sqrt{\kappa}$).
+    While significantly faster than SOR, it is slower than MG.
+  \item \textbf{Line Gauss-Seidel SOR:} Exhibits the slowest convergence (despite utilizing an optimized relaxation factor $\omega$).
+    As the iteration count increases, once high-frequency errors are eliminated, the removal of low-frequency errors becomes extremely slow.
+\end{itemize}
+
+\end{document}
