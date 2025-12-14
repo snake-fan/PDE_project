@@ -1,0 +1,11 @@
+[project]
+name = "final-project"
+version = "0.1.0"
+description = "PDE Numerical Simulation - Wave Equation Solver"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20",
+    "scipy>=1.7",
+    "matplotlib>=3.3",
+]
