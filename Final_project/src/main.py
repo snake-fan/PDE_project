@@ -15,7 +15,8 @@ plt.style.use('default')
 def task_a_stability():
     print("\n[Task A] 验证大时间步长稳定性...")
     N = 65
-    model = LiverModel(N, N)
+    h = 0.1 / N
+    model = LiverModel(h=h)
     
     # 对比 0.5倍 CFL (显式稳定) 和 2.0倍 CFL (隐式稳定，显式会炸)
     factors = [0.5, 2.0]
@@ -51,7 +52,8 @@ def task_a_stability():
 def task_b_solvers_comparison():
     print("\n[Task B] 对比四种迭代求解器 (Jacobi, GS, SOR, CG)...")
     N = 65
-    model = LiverModel(N, N)
+    h = 0.1 / N
+    model = LiverModel(h=h)
     sim = CNSimulation(model, dt_factor=2.0)
     print("  Running explicit steps to generate wave field...")
     for _ in range(50):
@@ -104,7 +106,8 @@ def task_b_solvers_comparison():
 def task_c_mg_smoothing():
     print("\n[Task C] 分析 MG 平滑次数影响...")
     N = 129
-    model = LiverModel(N, N)
+    h = 0.1 / N
+    model = LiverModel(h=h)
     sim = CNSimulation(model, dt_factor=2.0)
     print("  Running explicit steps to generate wave field...")
     for _ in range(50):
@@ -137,7 +140,7 @@ def task_d_complexity():
     
     # 1. 预热 (Warm-up) - 极其重要，消除首次编译抖动
     print("  Performing JIT warm-up...")
-    warmup_sim = CNSimulation(LiverModel(33, 33))
+    warmup_sim = CNSimulation(LiverModel(h=0.1/33))
     warmup_sim.step(method='mg', max_iter=1)
     warmup_sim.step(method='jacobi', max_iter=1)
     warmup_sim.step(method='cg', max_iter=1)
@@ -161,6 +164,8 @@ def task_d_complexity():
         prev_N = None
         
         for N in config['sizes']:
+            h = 0.1 / N
+            model = LiverModel(h=h)
             model = LiverModel(N, N)
             sim = CNSimulation(model, dt_factor=2.0)
             sim.p_curr[int(N/2), int(N/2)] = 1.0 
@@ -224,7 +229,8 @@ def task_d_complexity():
 def task_visualization():
     print("\n[Visualization] 生成波场快照...")
     N = 257
-    model = LiverModel(N, N)
+    h = 0.1 / N
+    model = LiverModel(h=h)
     sim = CNSimulation(model, dt_factor=2.0)
     
     # 运行一段时间并截图

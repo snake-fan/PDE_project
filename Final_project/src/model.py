@@ -42,14 +42,33 @@ def ricker_wavelet(t, f0):
     return val
 
 class LiverModel:
-    def __init__(self, nx, ny):
-        self.nx = nx
-        self.ny = ny
-        self.dx = cfg.L_X / (nx - 1)
-        self.dy = cfg.L_Y / (ny - 1)
+    def __init__(self, nx=None, ny=None, h=None):
+        """
+        初始化支持两种模式：
+        1. 指定网格数: LiverModel(nx=65, ny=65) -> 此时 dx, dy 可能不相等
+        2. 指定步长 h: LiverModel(h=0.5e-3)    -> 自动计算 nx, ny，保证 dx≈dy≈h
+        """
+        if h is not None:
+            # 模式 1: 基于步长 h 自动计算最近似的整数网格点
+            # N = L / h + 1
+            self.nx = int(np.round(cfg.L_X / h)) + 1
+            self.ny = int(np.round(cfg.L_Y / h)) + 1
+        else:
+            # 模式 2: 手动指定 nx, ny
+            if nx is None or ny is None:
+                raise ValueError("Must specify either 'h' or both 'nx' and 'ny'")
+            self.nx = nx
+            self.ny = ny
+
+        # 反算真实的 dx, dy (确保网格精确覆盖 L_X, L_Y)
+        self.dx = cfg.L_X / (self.nx - 1)
+        self.dy = cfg.L_Y / (self.ny - 1)
+        
+        # 打印一下实际的网格信息，方便确认
+        # print(f"Model initialized: {self.nx}x{self.ny}, dx={self.dx:.2e}, dy={self.dy:.2e}")
         
         # 初始化声速场
-        self.c_map = generate_velocity_map(nx, ny, self.dx, self.dy)
+        self.c_map = generate_velocity_map(self.nx, self.ny, self.dx, self.dy)
         self.c_max = np.max(self.c_map)
         
         # 计算源在网格中的索引
