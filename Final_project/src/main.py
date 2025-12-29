@@ -53,8 +53,9 @@ def task_b_solvers_comparison():
     N = 65
     model = LiverModel(N, N)
     sim = CNSimulation(model, dt_factor=2.0)
-    # 制造一个非零场作为初始条件，模拟仿真中途的情况
-    sim.p_curr[30:35, 30:35] = 1.0
+    print("  Running explicit steps to generate wave field...")
+    for _ in range(50):
+        sim.step(method='jacobi', max_iter=1) # 用简单方法先跑几步
     
     methods = ['jacobi', 'gs', 'sor', 'cg', 'mg']
     plt.figure(figsize=(10, 6))
@@ -105,7 +106,9 @@ def task_c_mg_smoothing():
     N = 129
     model = LiverModel(N, N)
     sim = CNSimulation(model, dt_factor=2.0)
-    sim.p_curr[60:70, 60:70] = 1.0 
+    print("  Running explicit steps to generate wave field...")
+    for _ in range(50):
+        sim.step(method='jacobi', max_iter=1) # 用简单方法先跑几步
     
     configs = [(1,1), (2,2), (3,3)]
     plt.figure(figsize=(8, 6))
