@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.4)  28 DEC 2025 20:37
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.11.4)  28 DEC 2025 21:04
 entering extended mode
  \write18 enabled.
  file:line:error style messages enabled.
@@ -412,46 +412,48 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 49.
  (/usr/local/texlive/2025/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-File: ../figs/Task2_A_Stability.png Graphic file (type bmp)
-<../figs/Task2_A_Stability.png>
-
 
 [1
 
 ]
-File: ../figs/Task2_B_Convergence.png Graphic file (type bmp)
-<../figs/Task2_B_Convergence.png>
-File: ../figs/Task2_C_Smoothing.png Graphic file (type bmp)
-<../figs/Task2_C_Smoothing.png>
+File: ../figs/Task2_A_Stability.png Graphic file (type bmp)
+<../figs/Task2_A_Stability.png>
 
 
 [2]
+File: ../figs/Task2_B_Convergence.png Graphic file (type bmp)
+<../figs/Task2_B_Convergence.png>
+
+
+[3]
+File: ../figs/Task2_C_Smoothing.png Graphic file (type bmp)
+<../figs/Task2_C_Smoothing.png>
 File: ../figs/Task2_D_Complexity.png Graphic file (type bmp)
 <../figs/Task2_D_Complexity.png>
 
 
-[3]
+[4]
 File: ../figs/Visualization.png Graphic file (type bmp)
 <../figs/Visualization.png>
 
 
-[4]
+[5]
 
-[5] (./final_project.aux)
+[6] (./final_project.aux)
  ***********
 LaTeX2e <2024-11-01> patch level 2
 L3 programming layer <2025-01-18>
  ***********
 Package rerunfilecheck Info: File `final_project.out' has not changed.
-(rerunfilecheck)             Checksum: 28C6C66CD049FFA99423250A9E57C52D;1494.
+(rerunfilecheck)             Checksum: 0EB7FD236A81085B6E6FC3589DA32080;2616.
  ) 
 Here is how much of TeX's memory you used:
- 13112 strings out of 473832
- 206674 string characters out of 5729481
- 618574 words of memory out of 5000000
- 36012 multiletter control sequences out of 15000+600000
- 565629 words of font info for 74 fonts, out of 8000000 for 9000
+ 13130 strings out of 473832
+ 207035 string characters out of 5729481
+ 626876 words of memory out of 5000000
+ 36025 multiletter control sequences out of 15000+600000
+ 566564 words of font info for 78 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 69i,7n,79p,632b,368s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 69i,7n,79p,635b,371s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on final_project.pdf (5 pages).
+Output written on final_project.pdf (6 pages).

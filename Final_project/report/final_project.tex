@@ -41,7 +41,7 @@
 \lstset{style=mystyle}
 
 \title{\Huge Numerical Simulation of Ultrasound Propagation in Liver Cirrhosis: Implicit Solver Analysis}
-\author{\normalsize Final Project Report}
+\author{Yifan Zhang \quad 2025251018}
 \date{\normalsize \today}
 
 \begin{document}
@@ -53,7 +53,75 @@
 
 \section{Introduction}
 
-The simulation models ultrasound propagation through a domain containing a cirrhotic lesion ($c=1600$ m/s) within healthy tissue ($c=1550$ m/s). The governing equation is discretized using the Crank-Nicolson method to form a linear system $Ax=b$ at each time step. The focus of this report is on the analysis of the numerical results obtained from the Python implementation.
+The simulation models ultrasound propagation through a domain containing a cirrhotic lesion ($c=1600$ m/s) within healthy tissue ($c=1550$ m/s). The governing equation is discretized using the Crank-Nicolson method to form a linear system $Ax=b$ at each time step. The focus of this report is on the theoretical formulation of the implicit solver and the analysis of the numerical results obtained from the Python implementation.
+
+\section{Theoretical Framework and Numerical Methods}
+
+To simulate the ultrasound propagation in the heterogeneous liver model, we employ the acoustic wave equation. This section details the discretization strategy using the implicit Crank-Nicolson method and the theoretical basis of the Geometric Multigrid solver used to invert the resulting linear system.
+
+\subsection{Governing Equation and Discretization}
+
+The 2D acoustic wave equation is given by:
+\begin{equation}
+  \frac{\partial^{2}p}{\partial t^{2}} = c^{2}(x,y) \nabla^{2}p + s(x,y,t)
+  \label{eq:wave}
+\end{equation}
+where $p$ is the pressure field, $c(x,y)$ is the variable sound speed, and $s$ is the source term.
+
+To ensure unconditional stability and allow for larger time steps, we adopt the \textbf{Crank-Nicolson (CN) implicit scheme}. We discretize the spatial domain using a uniform grid with spacing $h = \Delta x = \Delta y$ and the time domain with step $\Delta t$.
+
+The second-order temporal derivative is approximated by the central difference, and the spatial Laplacian is averaged between time steps $n$ and $n+1$:
+\begin{equation}
+  \frac{p_{i,j}^{n+1} - 2p_{i,j}^{n} + p_{i,j}^{n-1}}{\Delta t^2} = \frac{c_{i,j}^2}{2} \left[ \nabla_h^2 p_{i,j}^{n+1} + \nabla_h^2 p_{i,j}^{n} \right] + s_{i,j}^n
+\end{equation}
+where $\nabla_h^2$ is the discrete 5-point Laplacian operator:
+\begin{equation}
+  \nabla_h^2 p_{i,j} = \frac{p_{i+1,j} + p_{i-1,j} + p_{i,j+1} + p_{i,j-1} - 4p_{i,j}}{h^2}
+\end{equation}
+
+\subsection{Linear System Formulation}
+
+Defining the Courant number related coefficient $\sigma_{i,j} = \frac{c_{i,j}^2 \Delta t^2}{2 h^2}$, we can rearrange the discrete equation to separate the unknown terms at $t^{n+1}$ from the known terms at $t^n$ and $t^{n-1}$. This yields a linear system of the form $A \mathbf{x} = \mathbf{b}$, where $\mathbf{x} = p^{n+1}$.
+
+The simplified implicit equation for a node $(i,j)$ is:
+\begin{equation}
+  (1 + 4\sigma_{i,j}) p_{i,j}^{n+1} - \sigma_{i,j} \left( p_{i+1,j}^{n+1} + p_{i-1,j}^{n+1} + p_{i,j+1}^{n+1} + p_{i,j-1}^{n+1} \right) = b_{i,j}
+  \label{eq:discrete_system}
+\end{equation}
+The Right-Hand Side (RHS) vector $b$ contains terms from previous time steps:
+\begin{equation}
+  b_{i,j} = 2p_{i,j}^n - p_{i,j}^{n-1} + \sigma_{i,j} h^2 \nabla_h^2 p_{i,j}^n + \Delta t^2 s_{i,j}^n
+\end{equation}
+
+Equation (\ref{eq:discrete_system}) forms a sparse, symmetric, positive-definite (SPD) linear system that must be solved at every time step.
+
+\subsection{Von Neumann Stability Analysis}
+
+The explicit finite difference scheme is constrained by the CFL condition $\Delta t \le \frac{h}{c_{\max}\sqrt{2}}$. In contrast, the Crank-Nicolson scheme is unconditionally stable.
+
+Applying Von Neumann analysis, we assume a solution of the form $p_{i,j}^n = \xi^n e^{I(k_x x_i + k_y y_j)}$, where $\xi$ is the amplification factor and $I=\sqrt{-1}$. Substituting this into the homogeneous difference equation, the amplification factor for the Crank-Nicolson scheme satisfies:
+\begin{equation}
+  |\xi| = \left| \frac{1 - \beta}{1 + \beta} \right| \le 1, \quad \text{where } \beta = \frac{c^2 \Delta t^2}{h^2}(\sin^2(k_x h/2) + \sin^2(k_y h/2))
+\end{equation}
+Since $\beta \ge 0$, $|\xi| \le 1$ holds for any $\Delta t > 0$, confirming unconditional stability. However, as noted in the results section, large $\Delta t$ introduces numerical dispersion.
+
+\subsection{Geometric Multigrid Solver}
+
+To solve the linear system efficiently, we implemented a Geometric Multigrid (GMG) solver. Standard iterative methods dampen high-frequency error components quickly but stagnate on low-frequency errors. GMG addresses this by traversing a hierarchy of grids. Our implementation uses a \textbf{V-cycle} scheme:
+
+\begin{enumerate}
+  \item \textbf{Pre-smoothing:} $\nu_1$ iterations of Gauss-Seidel (Red-Black) on the fine grid $\Omega_h$.
+  \item \textbf{Residual Calculation:} $r_h = b_h - A_h x_h$.
+  \item \textbf{Restriction ($I_h^{2h}$):} The residual is transferred to the coarse grid $\Omega_{2h}$ using \textbf{Full Weighting}:
+    \begin{equation}
+      r_{2h}(i,j) = \frac{1}{16}
+      \begin{bmatrix} 1 & 2 & 1 \\ 2 & 4 & 2 \\ 1 & 2 & 1
+      \end{bmatrix} * r_h
+    \end{equation}
+  \item \textbf{Coarse Grid Correction:} Solve $A_{2h} e_{2h} = r_{2h}$ on the coarse grid.
+  \item \textbf{Prolongation ($I_{2h}^h$):} The error is interpolated back using \textbf{Bilinear Interpolation}: $x_h \leftarrow x_h + I_{2h}^h e_{2h}$.
+  \item \textbf{Post-smoothing:} $\nu_2$ iterations of Gauss-Seidel to remove interpolation artifacts.
+\end{enumerate}
 
 \section{Results and Discussion}
 
@@ -68,13 +136,13 @@ We validated the unconditional stability of the Crank-Nicolson scheme by compari
   \label{fig:stability}
 \end{figure}
 
-**Observation:** As shown in Figure \ref{fig:stability}, the behavior of the two settings differs significantly:
+\textbf{Observation:} As shown in Figure \ref{fig:stability}, the behavior of the two settings differs significantly:
 \begin{itemize}
-  \item The **Blue line** ($0.5 \times$ CFL) captures a transient pressure fluctuation (the negative spike around $25 \mu s$).
-  \item The **Orange line** ($2.0 \times$ CFL) remains essentially flat at zero.
+  \item The \textbf{Blue line} ($0.5 \times$ CFL) captures a transient pressure fluctuation (the negative spike around $25 \mu s$).
+  \item The \textbf{Orange line} ($2.0 \times$ CFL) remains essentially flat at zero.
 \end{itemize}
 
-**Analysis:** While the orange line confirms "stability" (the solution does not explode to infinity, which would happen in an explicit scheme), it also reveals the presence of significant **numerical damping** or temporal resolution loss associated with large time steps in implicit methods. The high-frequency transient components of the wave are effectively filtered out by the large $\Delta t$. Thus, while the scheme allows for large steps, accuracy requirements may still dictate smaller steps for transient wave modeling.
+\textbf{Analysis:} While the orange line confirms "stability" (the solution does not explode to infinity, which would happen in an explicit scheme), it also reveals the presence of significant \textbf{numerical damping} or temporal resolution loss associated with large time steps in implicit methods. The high-frequency transient components of the wave are effectively filtered out by the large $\Delta t$. Thus, while the scheme allows for large steps, accuracy requirements may still dictate smaller steps for transient wave modeling.
 
 \subsection{Solver Convergence Comparison (Task B)}
 
@@ -87,11 +155,11 @@ For a single time step, we compared the reduction of the relative residual $\|r\
   \label{fig:convergence}
 \end{figure}
 
-**Observation:** Figure \ref{fig:convergence} demonstrates a dramatic difference in convergence efficiency:
+\textbf{Observation:} Figure \ref{fig:convergence} demonstrates a dramatic difference in convergence efficiency:
 \begin{itemize}
-  \item **Multigrid (Purple):** Exhibits the fastest convergence per iteration, reducing the residual to $10^{-7}$ in fewer than 5 V-cycles. This confirms the theoretical effectiveness of MG in eliminating errors across the spectrum.
-  \item **Conjugate Gradient (Red):** Shows excellent convergence, significantly outperforming the stationary methods (Jacobi/GS/SOR).
-  \item **Jacobi (Blue):** Is the slowest, requiring the most iterations to reduce the error.
+  \item \textbf{Multigrid (Purple):} Exhibits the fastest convergence per iteration, reducing the residual to $10^{-7}$ in fewer than 5 V-cycles. This confirms the theoretical effectiveness of MG in eliminating errors across the spectrum.
+  \item \textbf{Conjugate Gradient (Red):} Shows excellent convergence, significantly outperforming the stationary methods (Jacobi/GS/SOR).
+  \item \textbf{Jacobi (Blue):} Is the slowest, requiring the most iterations to reduce the error.
 \end{itemize}
 
 \subsection{Multigrid Smoothing Analysis (Task C)}
@@ -105,7 +173,7 @@ We investigated how the number of pre-smoothing and post-smoothing steps affects
   \label{fig:smoothing}
 \end{figure}
 
-**Analysis:** Figure \ref{fig:smoothing} confirms that increasing smoothing steps improves the convergence rate per cycle. The (3, 3) configuration (Green) yields the steepest slope. However, since each V-cycle becomes more expensive with more smoothing, the (2, 2) configuration (Orange) represents a practical balance between cycle count and work per cycle.
+\textbf{Analysis:} Figure \ref{fig:smoothing} confirms that increasing smoothing steps improves the convergence rate per cycle. The (3, 3) configuration (Green) yields the steepest slope. However, since each V-cycle becomes more expensive with more smoothing, the (2, 2) configuration (Orange) represents a practical balance between cycle count and work per cycle.
 
 \subsection{Computational Complexity (Task D)}
 
@@ -118,14 +186,14 @@ We measured the total "Time to Solution" across varying grid sizes $N$ to assess
   \label{fig:complexity}
 \end{figure}
 
-**Observation:** Contrary to typical expectations where overhead might hinder Python-based Multigrid, Figure \ref{fig:complexity} shows distinct results for our implementation:
+\textbf{Observation:} Contrary to typical expectations where overhead might hinder Python-based Multigrid, Figure \ref{fig:complexity} shows distinct results for our implementation:
 \begin{itemize}
-  \item **Multigrid (Green):** Achieves the **lowest** execution time for all tested grid sizes. Its slope is also the flattest, indicating superior asymptotic scaling (closer to $O(N)$) compared to the other methods.
-  \item **Conjugate Gradient (Orange):** Is slower than MG but scales reasonably well. Interestingly, at large $N$, its slope appears to steepen slightly, approaching the behavior of Jacobi.
-  \item **Jacobi (Blue):** Scales linearly on the log-log plot but with a higher constant factor than MG.
+  \item \textbf{Multigrid (Green):} Achieves the \textbf{lowest} execution time for all tested grid sizes. Its slope is also the flattest, indicating superior asymptotic scaling (closer to $O(N)$) compared to the other methods.
+  \item \textbf{Conjugate Gradient (Orange):} Is slower than MG but scales reasonably well. Interestingly, at large $N$, its slope appears to steepen slightly, approaching the behavior of Jacobi.
+  \item \textbf{Jacobi (Blue):} Scales linearly on the log-log plot but with a higher constant factor than MG.
 \end{itemize}
 
-**Analysis:** The experimental data indicates that for this specific problem and implementation, the geometric Multigrid solver is the most efficient choice, successfully overcoming the interpretation overhead of Python/Numba even at moderate grid sizes.
+\textbf{Analysis:} The experimental data indicates that for this specific problem and implementation, the geometric Multigrid solver is the most efficient choice, successfully overcoming the interpretation overhead of Python/Numba even at moderate grid sizes.
 
 \subsection{Physical Visualization}
 
@@ -138,13 +206,13 @@ Finally, we visualize the wave propagation to verify the physical correctness of
   \label{fig:vis}
 \end{figure}
 
-**Analysis:** In the rightmost panel ($t=30 \mu s$) of Figure \ref{fig:vis}, we observe the wavefront interacting with the inner circle. The wavefront inside the inner circle (where $c=1600$ m/s) has propagated slightly further downwards compared to the wave in the surrounding background (where $c=1450$ m/s). This "bulging" of the wavefront is consistent with Snell's law and the physical expectation that sound travels faster in the harder cirrhotic tissue.
+\textbf{Analysis:} In the rightmost panel ($t=30 \mu s$) of Figure \ref{fig:vis}, we observe the wavefront interacting with the inner circle. The wavefront inside the inner circle (where $c=1600$ m/s) has propagated slightly further downwards compared to the wave in the surrounding background (where $c=1450$ m/s). This "bulging" of the wavefront is consistent with Snell's law and the physical expectation that sound travels faster in the harder cirrhotic tissue.
 
 \section{Conclusion}
 
 The project successfully implemented a stable implicit solver. The numerical experiments revealed that:
 1.  The implicit scheme guarantees stability but requires careful time-step selection to avoid excessive numerical damping (Task A).
-2.  **Geometric Multigrid** proved to be the superior solver in this specific implementation, offering both the fastest convergence rate (Task B) and the lowest total execution time (Task D).
+2.  \textbf{Geometric Multigrid} proved to be the superior solver in this specific implementation, offering both the fastest convergence rate (Task B) and the lowest total execution time (Task D).
 3.  The simulation correctly captures the physics of refraction through heterogeneous media.
 
 \end{document}
